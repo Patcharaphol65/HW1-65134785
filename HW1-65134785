@@ -1,0 +1,160 @@
+class Book {
+  String title;
+  String author;
+  String isbn;
+  int copies;
+
+  Book({
+    required this.title,
+    required this.author,
+    required this.isbn,
+    required this.copies,
+  });
+
+  void borrowBook() {
+    if (copies > 0) {
+      copies--;
+      print("ยืมหนังสือ '$title' สำเร็จ");
+    } else {
+      print("หนังสือ '$title' ไม่มีสำเนาให้ยืม");
+    }
+  }
+
+  void returnBook() {
+    copies++;
+    print("คืนหนังสือ '$title' สำเร็จ");
+  }
+
+  @override
+  String toString() {
+    return 'หนังสือ: $title, ผู้แต่ง: $author, ISBN: $isbn, จำนวนสำเนาที่มี: $copies';
+  }
+}
+
+class Member {
+  String name;
+  String memberId;
+  List<Book> borrowedBooks = [];
+
+  Member({
+    required this.name,
+    required this.memberId,
+  });
+
+  void borrowBook(Book book) {
+    if (book.copies > 0) {
+      book.copies--;
+      borrowedBooks.add(book);
+      print("$name ยืมหนังสือ '${book.title}' สำเร็จ");
+    } else {
+      print("หนังสือ '${book.title}' ไม่มีสำเนาให้ยืม");
+    }
+  }
+
+  void returnBook(Book book) {
+    if (borrowedBooks.contains(book)) {
+      book.copies++;
+      borrowedBooks.remove(book);
+      print("$name คืนหนังสือ '${book.title}' สำเร็จ");
+    } else {
+      print("$name ไม่ได้ยืมหนังสือ '${book.title}'");
+    }
+  }
+
+  @override
+  String toString() {
+    String borrowedBooksStr = borrowedBooks.isEmpty
+        ? 'ยังไม่มีการยืมหนังสือ'
+        : borrowedBooks.map((book) => book.title).join(', ');
+    return 'สมาชิก: $name, รหัสสมาชิก: $memberId, หนังสือที่ยืม: $borrowedBooksStr';
+  }
+}
+
+class Library {
+  List<Book> books = [];
+  List<Member> members = [];
+
+  void addBook(Book book) {
+    books.add(book);
+    print("เพิ่มหนังสือ '${book.title}' สำเร็จ");
+  }
+
+  void removeBook(Book book) {
+    if (books.contains(book)) {
+      books.remove(book);
+      print("ลบหนังสือ '${book.title}' ออกจากห้องสมุด");
+    } else {
+      print("หนังสือ '${book.title}' ไม่มีอยู่ในห้องสมุด");
+    }
+  }
+
+  void registerMember(Member member) {
+    members.add(member);
+    print("ลงทะเบียนสมาชิก '${member.name}' สำเร็จ");
+  }
+
+  Member? findMember(String memberId) {
+    return members.firstWhere((member) => member.memberId == memberId,
+        orElse: () => Member(name: '', memberId: ''));
+  }
+
+  Book? findBook(String isbn) {
+    return books.firstWhere((book) => book.isbn == isbn,
+        orElse: () => Book(title: '', author: '', isbn: '', copies: 0));
+  }
+
+  void borrowBook(String memberId, String isbn) {
+    Member? member = findMember(memberId);
+    Book? book = findBook(isbn);
+    if (member!.name.isNotEmpty && book!.title.isNotEmpty) {
+      member.borrowBook(book);
+    } else {
+      print("ไม่สามารถยืมหนังสือได้ กรุณาตรวจสอบข้อมูล");
+    }
+  }
+
+  void returnBook(String memberId, String isbn) {
+    Member? member = findMember(memberId);
+    Book? book = findBook(isbn);
+    if (member!.name.isNotEmpty && book!.title.isNotEmpty) {
+      member.returnBook(book);
+    } else {
+      print("ไม่สามารถคืนหนังสือได้ กรุณาตรวจสอบข้อมูล");
+    }
+  }
+
+  void displayBooks() {
+    print("รายการหนังสือในห้องสมุด:");
+    books.forEach((book) => print(book));
+  }
+
+  void displayMembers() {
+    print("รายชื่อสมาชิกในห้องสมุด:");
+    members.forEach((member) => print(member));
+  }
+}
+
+void main() {
+  Library library = Library();
+
+  Book book1 =
+      Book(title: 'สร้างเว็บไซต์', author: 'Author 1', isbn: '111', copies: 8);
+  Book book2 = Book(
+      title: 'พัฒนา Mobile App', author: 'Author 2', isbn: '222', copies: 10);
+
+  library.addBook(book1);
+  library.addBook(book2);
+
+  Member member1 = Member(name: 'สมชาย ใจดี', memberId: 'M001');
+  Member member2 = Member(name: 'สมหญิง ใจดี', memberId: 'M002');
+
+  library.registerMember(member1);
+  library.registerMember(member2);
+
+  library.borrowBook('M001', '111');
+  library.borrowBook('M002', '222');
+  library.returnBook('M001', '111');
+
+  library.displayBooks();
+  library.displayMembers();
+}
